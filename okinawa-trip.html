@@ -361,37 +361,34 @@
     line-height:1.7;
   }
 
-  /* ---------- WEATHER ---------- */
-  .weather-wrap{
-    max-width:980px;
-    margin:14px auto 0;
-    padding:0 20px;
-  }
-  .weather-strip{
+  /* ---------- WEATHER (inline with route map) ---------- */
+  .route-weather{
     display:flex;
-    gap:10px;
-    overflow-x:auto;
-    padding:4px 2px;
+    gap:6px;
+    justify-content:center;
+    flex-wrap:wrap;
+    margin:2px 0 10px;
   }
-  .weather-day{
-    flex:0 0 auto;
-    min-width:78px;
-    background:var(--card);
-    border:2px solid var(--line);
-    border-radius:14px;
-    text-align:center;
-    padding:8px 6px;
-    box-shadow:var(--shadow);
+  .weather-slot{
+    display:flex;
+    align-items:center;
+    gap:5px;
+    background:var(--sand-deep);
+    border:1px dashed var(--coral);
+    border-radius:999px;
+    padding:3px 10px;
+    font-size:11.5px;
+    color:var(--ink);
+    white-space:nowrap;
   }
-  .weather-day .wd-date{font-size:11px;font-weight:700;color:var(--ocean-deep);}
-  .weather-day .wd-icon{font-size:22px;margin:4px 0;}
-  .weather-day .wd-temp{font-size:12px;color:var(--ink);font-weight:700;}
-  .weather-day .wd-rain{font-size:10.5px;color:#7a8a8a;}
+  .weather-slot .ws-time{font-weight:700;color:var(--ocean-deep);}
+  .weather-slot .ws-icon{font-size:14px;}
+  .weather-slot .ws-rain{color:#8a6a4a;}
   .weather-note{
     text-align:center;
     font-size:11.5px;
     color:#9aa8a8;
-    margin-top:4px;
+    margin-top:2px;
   }
 
   /* ---------- ITEM ACTIONS (checkbox / ics / map link) ---------- */
@@ -524,13 +521,8 @@
 <div class="route-wrap">
   <div class="route-card">
     <div class="route-title" id="routeTitle">✈️ Day 1 路線（Q版地圖）</div>
+    <div class="route-weather" id="routeWeather"></div>
     <div class="route-svg-holder" id="routeSvgHolder"></div>
-  </div>
-</div>
-
-<div class="weather-wrap">
-  <div class="weather-strip" id="weatherStrip">
-    <div class="weather-day"><div class="wd-date">載入天氣中…</div></div>
   </div>
   <div class="weather-note" id="weatherNote"></div>
 </div>
@@ -953,11 +945,22 @@ function renderRouteMap(day){
       ${nodesSvg}
     </svg>`;
   routeTitleEl.textContent = `✈️ ${day.day}（${day.date}）路線：${day.theme}`;
+  renderDayWeather(day);
 }
 
 const itemsIndex = {}; // itemKey -> {iso, time, title, note, nav}
 let completedMap = loadCompletedLocal();
 let currentActiveId = DAYS[0].id;
+
+const WMAP = {
+  0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',
+  51:'🌦️',53:'🌦️',55:'🌦️',61:'🌧️',63:'🌧️',65:'🌧️',
+  71:'🌨️',73:'🌨️',75:'🌨️',80:'🌦️',81:'🌧️',82:'⛈️',
+  95:'⛈️',96:'⛈️',99:'⛈️'
+};
+const WEATHER_SLOT_HOURS = [8, 12, 15, 18]; // morning / noon / afternoon / evening
+let weatherHourly = null; // {time:[...], temperature_2m:[...], precipitation_probability:[...], weathercode:[...]}
+let weatherLoadError = false;
 
 function loadCompletedLocal(){
   try{ return JSON.parse(localStorage.getItem('okinawaCompletedMap') || '{}'); }
@@ -1277,48 +1280,63 @@ document.getElementById('exportAllIcsBtn').addEventListener('click', () => {
 });
 
 // ---------- live weather (Open-Meteo, no API key needed) ----------
-(async function loadWeather(){
-  const strip = document.getElementById('weatherStrip');
+// Hourly (not just daily min/max) so each day shows a few real time-of-day readings,
+// rendered inline with the route map instead of a separate row of cards.
+function renderDayWeather(day){
+  const el = document.getElementById('routeWeather');
   const note = document.getElementById('weatherNote');
+  if(!el) return;
+  if(!day || !day.iso){ el.innerHTML = ''; if(note) note.textContent = ''; return; }
+  if(weatherLoadError){
+    el.innerHTML = '';
+    if(note) note.textContent = '天氣資料載入失敗，請檢查網路連線';
+    return;
+  }
+  if(!weatherHourly){
+    el.innerHTML = '<div class="weather-slot">載入天氣中…</div>';
+    if(note) note.textContent = '';
+    return;
+  }
+  const slots = WEATHER_SLOT_HOURS.map(hour => {
+    const target = `${day.iso}T${String(hour).padStart(2,'0')}:00`;
+    const idx = weatherHourly.time.indexOf(target);
+    if(idx === -1) return null;
+    return {
+      hour,
+      icon: WMAP[weatherHourly.weathercode[idx]] || '🌡️',
+      temp: Math.round(weatherHourly.temperature_2m[idx]),
+      rain: weatherHourly.precipitation_probability[idx]
+    };
+  }).filter(Boolean);
+
+  if(!slots.length){
+    el.innerHTML = '';
+    if(note) note.textContent = '目前超出天氣預報範圍（通常只能抓未來 16 天），接近出發日再重新整理頁面看看';
+    return;
+  }
+  el.innerHTML = slots.map(s => `
+    <span class="weather-slot">
+      <span class="ws-time">${s.hour}:00</span>
+      <span class="ws-icon">${s.icon}</span>
+      <span>${s.temp}°</span>
+      <span class="ws-rain">☔${s.rain}%</span>
+    </span>`).join('');
+  if(note) note.textContent = '天氣預報來自 Open-Meteo，僅供參考，出發前請再次確認最新預報／颱風警報';
+}
+
+(async function loadWeather(){
   try{
     // Naha, Okinawa coordinates
-    const url = 'https://api.open-meteo.com/v1/forecast?latitude=26.2124&longitude=127.6809&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FTokyo&forecast_days=16';
+    const url = 'https://api.open-meteo.com/v1/forecast?latitude=26.2124&longitude=127.6809&hourly=weathercode,temperature_2m,precipitation_probability&timezone=Asia%2FTokyo&forecast_days=16';
     const res = await fetch(url);
     if(!res.ok) throw new Error('weather fetch failed');
     const data = await res.json();
-    const tripIsoSet = DAYS.map(d => d.iso);
-    const WMAP = {
-      0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',
-      51:'🌦️',53:'🌦️',55:'🌦️',61:'🌧️',63:'🌧️',65:'🌧️',
-      71:'🌨️',73:'🌨️',75:'🌨️',80:'🌦️',81:'🌧️',82:'⛈️',
-      95:'⛈️',96:'⛈️',99:'⛈️'
-    };
-    let html = '';
-    data.daily.time.forEach((iso, i) => {
-      if(!tripIsoSet.includes(iso)) return;
-      const day = DAYS.find(d => d.iso === iso);
-      const icon = WMAP[data.daily.weathercode[i]] || '🌡️';
-      const max = Math.round(data.daily.temperature_2m_max[i]);
-      const min = Math.round(data.daily.temperature_2m_min[i]);
-      const rain = data.daily.precipitation_probability_max[i];
-      html += `<div class="weather-day">
-        <div class="wd-date">${day ? day.date : iso}</div>
-        <div class="wd-icon">${icon}</div>
-        <div class="wd-temp">${min}°–${max}°</div>
-        <div class="wd-rain">☔ ${rain}%</div>
-      </div>`;
-    });
-    if(html){
-      strip.innerHTML = html;
-      note.textContent = '天氣預報來自 Open-Meteo，僅供參考，出發前請再次確認最新預報／颱風警報';
-    } else {
-      strip.innerHTML = '<div class="weather-day"><div class="wd-date">尚無預報</div></div>';
-      note.textContent = '目前超出天氣預報範圍（通常只能抓未來 16 天），接近出發日再重新整理頁面看看';
-    }
+    weatherHourly = data.hourly;
   } catch(e){
-    strip.innerHTML = '<div class="weather-day"><div class="wd-date">無法載入</div></div>';
-    note.textContent = '天氣資料載入失敗，請檢查網路連線';
+    weatherLoadError = true;
   }
+  const activeDay = DAYS.find(d => d.id === currentActiveId);
+  if(activeDay) renderDayWeather(activeDay);
 })();
 
 // --- Simple in-tab notification demo (MVP) ---
