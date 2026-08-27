@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>沖繩四天三夜 · 親子行程</title>
+<meta name="theme-color" content="#0E7C86">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<style>
+  :root{
+    --sand:#FFF6E9;
+    --sand-deep:#FDE9C8;
+    --ocean:#0E7C86;
+    --ocean-deep:#0A5C64;
+    --coral:#FF7A59;
+    --coral-deep:#E85D3D;
+    --sun:#FFC33D;
+    --ink:#2B3A3A;
+    --card:#FFFFFF;
+    --line:#E8DCC4;
+    --shadow: 0 6px 0 rgba(43,58,58,0.08);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(circle at 10% 0%, #CFEFEF 0%, transparent 45%),
+      radial-gradient(circle at 90% 10%, #FFE3C4 0%, transparent 40%),
+      var(--sand);
+    font-family:'Noto Sans TC', sans-serif;
+    color:var(--ink);
+    padding-bottom:60px;
+  }
+  h1,h2,h3,.display{
+    font-family:'Baloo 2','Noto Sans TC',sans-serif;
+  }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    padding:36px 20px 18px;
+    text-align:center;
+  }
+  .hero .eyebrow{
+    display:inline-block;
+    background:var(--ocean);
+    color:#fff;
+    font-weight:700;
+    font-size:13px;
+    letter-spacing:.08em;
+    padding:5px 14px;
+    border-radius:999px;
+    margin-bottom:12px;
+  }
+  .hero h1{
+    font-size:clamp(28px,6vw,42px);
+    font-weight:800;
+    color:var(--ocean-deep);
+    margin:0 0 6px;
+  }
+  .hero p{
+    margin:0;
+    color:#5b6d6d;
+    font-size:15px;
+  }
+
+  /* ---------- ROUTE MAP (signature) ---------- */
+  .route-wrap{
+    margin:22px auto 8px;
+    max-width:980px;
+    padding:0 12px;
+  }
+  .route-card{
+    background:var(--card);
+    border-radius:26px;
+    box-shadow:var(--shadow);
+    border:2px solid var(--line);
+    padding:18px 8px 22px;
+    overflow-x:auto;
+  }
+  .route-title{
+    text-align:center;
+    font-size:14px;
+    font-weight:700;
+    color:var(--ocean-deep);
+    letter-spacing:.04em;
+    margin-bottom:6px;
+  }
+  .route-svg-holder{
+    min-width:820px;
+    min-height:235px;
+  }
+  .route-node-label{
+    font-family:'Noto Sans TC',sans-serif;
+    font-size:11.5px;
+    font-weight:700;
+    fill:var(--ink);
+  }
+  .route-node-sub{
+    font-family:'Noto Sans TC',sans-serif;
+    font-size:9.5px;
+    fill:#7a8a8a;
+  }
+
+  /* ---------- CONTROLS ---------- */
+  .controls{
+    max-width:980px;
+    margin:22px auto 0;
+    padding:0 20px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    align-items:center;
+    justify-content:center;
+  }
+  .controls label{
+    font-size:13px;
+    font-weight:700;
+    color:var(--ocean-deep);
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:var(--card);
+    border:2px solid var(--line);
+    padding:8px 14px;
+    border-radius:999px;
+  }
+  .controls input[type="number"]{
+    width:52px;
+    border:none;
+    border-bottom:2px solid var(--coral);
+    font-size:14px;
+    font-weight:700;
+    text-align:center;
+    background:transparent;
+    color:var(--coral-deep);
+  }
+  .controls input:focus{outline:none;}
+  .notify-btn{
+    border:2px solid var(--ocean);
+    background:var(--ocean);
+    color:#fff;
+    font-weight:700;
+    font-size:13px;
+    padding:9px 16px;
+    border-radius:999px;
+    cursor:pointer;
+    transition:transform .15s ease;
+  }
+  .notify-btn:hover{transform:translateY(-1px);}
+  .notify-btn.active{background:var(--sun);border-color:var(--sun);color:var(--ink);}
+
+  /* ---------- DAY TABS ---------- */
+  .tabs{
+    max-width:980px;
+    margin:20px auto 0;
+    padding:0 20px;
+    display:flex;
+    gap:8px;
+    justify-content:center;
+    flex-wrap:wrap;
+  }
+  .tab{
+    cursor:pointer;
+    border:2px solid var(--line);
+    background:var(--card);
+    border-radius:16px;
+    padding:10px 16px;
+    text-align:center;
+    min-width:96px;
+    transition:all .15s ease;
+  }
+  .tab .tab-day{font-family:'Baloo 2';font-weight:800;font-size:15px;color:var(--ocean-deep);}
+  .tab .tab-date{font-size:11px;color:#8a9a9a;font-weight:600;}
+  .tab .tab-theme{font-size:11px;color:var(--coral-deep);font-weight:700;margin-top:2px;}
+  .tab.active{
+    background:var(--ocean);
+    border-color:var(--ocean);
+  }
+  .tab.active .tab-day, .tab.active .tab-date, .tab.active .tab-theme{color:#fff;}
+  .tab-break{
+    flex-basis:100%;
+    height:8px;
+  }
+
+  /* ---------- TIMELINE ---------- */
+  .timeline-wrap{
+    max-width:760px;
+    margin:26px auto 0;
+    padding:0 20px;
+  }
+  .day-panel{display:none;}
+  .day-panel.active{display:block;}
+  .timeline{
+    position:relative;
+    padding-left:34px;
+  }
+  .timeline::before{
+    content:"";
+    position:absolute;
+    left:11px;
+    top:6px;
+    bottom:6px;
+    width:3px;
+    background:repeating-linear-gradient(to bottom, var(--sun) 0 8px, transparent 8px 14px);
+    border-radius:3px;
+  }
+  .item{
+    position:relative;
+    margin-bottom:16px;
+  }
+  .item::before{
+    content:attr(data-icon);
+    position:absolute;
+    left:-34px;
+    top:0;
+    width:26px;
+    height:26px;
+    border-radius:50%;
+    background:var(--card);
+    border:2px solid var(--ocean);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:13px;
+    z-index:2;
+  }
+  .item.transition::before{border-color:var(--coral);background:#FFF0EA;}
+  .item-card{
+    background:var(--card);
+    border:2px solid var(--line);
+    border-radius:16px;
+    padding:12px 16px;
+    box-shadow:var(--shadow);
+  }
+  .item-top{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .item-time{
+    font-family:'Baloo 2';
+    font-weight:800;
+    font-size:17px;
+    color:var(--ocean-deep);
+  }
+  .item-title{
+    font-weight:700;
+    font-size:15px;
+    color:var(--ink);
+  }
+  .item-note{
+    margin-top:4px;
+    font-size:13px;
+    color:#6b7a7a;
+    line-height:1.5;
+  }
+  .reminder-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    margin-top:8px;
+    background:#FFF0EA;
+    border:1.5px dashed var(--coral);
+    color:var(--coral-deep);
+    font-size:12.5px;
+    font-weight:700;
+    padding:4px 10px;
+    border-radius:999px;
+  }
+  .nav-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    margin-top:8px;
+    margin-left:6px;
+    background:#EAF7F5;
+    border:1.5px dashed var(--ocean);
+    color:var(--ocean-deep);
+    font-size:12.5px;
+    font-weight:700;
+    padding:4px 10px;
+    border-radius:999px;
+  }
+  .day-summary{
+    text-align:center;
+    font-size:13px;
+    color:#7a8a8a;
+    margin-bottom:18px;
+    background:var(--sand-deep);
+    border-radius:14px;
+    padding:8px 14px;
+    border:1px dashed var(--coral);
+  }
+  .lodging{
+    text-align:center;
+    font-size:13px;
+    font-weight:700;
+    color:var(--ocean-deep);
+    margin-top:18px;
+    padding:10px;
+    background:#EAF7F5;
+    border-radius:14px;
+  }
+
+  /* ---------- NOTES / PACKING PANELS ---------- */
+  .info-card{
+    background:var(--card);
+    border:2px solid var(--line);
+    border-radius:16px;
+    padding:16px 18px;
+    box-shadow:var(--shadow);
+    margin-bottom:16px;
+  }
+  .info-card h3{
+    margin:0 0 10px;
+    font-size:16px;
+    color:var(--ocean-deep);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .info-card ul{
+    margin:0;
+    padding-left:0;
+    list-style:none;
+  }
+  .info-card li{
+    position:relative;
+    padding:6px 0 6px 24px;
+    font-size:14px;
+    line-height:1.55;
+    color:var(--ink);
+    border-bottom:1px dashed var(--line);
+  }
+  .info-card li:last-child{border-bottom:none;}
+  .info-card li::before{
+    content:"✓";
+    position:absolute;
+    left:0;
+    top:6px;
+    color:var(--coral-deep);
+    font-weight:700;
+  }
+  .info-card.warn li::before{
+    content:"⚠️";
+  }
+  footer{
+    max-width:760px;
+    margin:34px auto 0;
+    padding:0 20px;
+    text-align:center;
+    font-size:12px;
+    color:#9aa8a8;
+    line-height:1.7;
+  }
+
+  /* ---------- WEATHER ---------- */
+  .weather-wrap{
+    max-width:980px;
+    margin:14px auto 0;
+    padding:0 20px;
+  }
+  .weather-strip{
+    display:flex;
+    gap:10px;
+    overflow-x:auto;
+    padding:4px 2px;
+  }
+  .weather-day{
+    flex:0 0 auto;
+    min-width:78px;
+    background:var(--card);
+    border:2px solid var(--line);
+    border-radius:14px;
+    text-align:center;
+    padding:8px 6px;
+    box-shadow:var(--shadow);
+  }
+  .weather-day .wd-date{font-size:11px;font-weight:700;color:var(--ocean-deep);}
+  .weather-day .wd-icon{font-size:22px;margin:4px 0;}
+  .weather-day .wd-temp{font-size:12px;color:var(--ink);font-weight:700;}
+  .weather-day .wd-rain{font-size:10.5px;color:#7a8a8a;}
+  .weather-note{
+    text-align:center;
+    font-size:11.5px;
+    color:#9aa8a8;
+    margin-top:4px;
+  }
+
+  /* ---------- ITEM ACTIONS (checkbox / ics / map link) ---------- */
+  .item-actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-top:8px;
+    align-items:center;
+  }
+  .done-toggle{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-size:12.5px;
+    font-weight:700;
+    color:var(--ocean-deep);
+    cursor:pointer;
+    background:#EAF7F5;
+    border:1.5px solid var(--ocean);
+    border-radius:999px;
+    padding:4px 10px 4px 8px;
+    user-select:none;
+  }
+  .done-toggle input{margin:0;}
+  .item.done .item-title, .item.done .item-time{
+    text-decoration:line-through;
+    opacity:.55;
+  }
+  .item.done .item-card{opacity:.75;}
+  .ics-btn, .map-link{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    font-size:12.5px;
+    font-weight:700;
+    border-radius:999px;
+    padding:4px 10px;
+    cursor:pointer;
+    text-decoration:none;
+    border:1.5px dashed var(--coral);
+    color:var(--coral-deep);
+    background:#FFF0EA;
+  }
+  .map-link{border-color:var(--ocean);color:var(--ocean-deep);background:#EAF7F5;}
+  .ics-btn:hover, .map-link:hover{filter:brightness(0.97);}
+  .top-ics-btn{
+    border:2px solid var(--coral);
+    background:var(--coral);
+    color:#fff;
+    font-weight:700;
+    font-size:13px;
+    padding:9px 16px;
+    border-radius:999px;
+    cursor:pointer;
+  }
+  .sync-note{
+    font-size:11px;
+    color:#9aa8a8;
+    text-align:center;
+    margin-top:4px;
+  }
+
+  /* ---------- CHAT WALL ---------- */
+  .chat-wall{max-width:600px;margin:0 auto;}
+  .chat-msgs{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin-bottom:14px;
+    max-height:420px;
+    overflow-y:auto;
+  }
+  .chat-msg{
+    background:var(--card);
+    border:2px solid var(--line);
+    border-radius:14px;
+    padding:8px 12px;
+  }
+  .chat-msg .cm-meta{font-size:11px;color:#8a9a9a;font-weight:700;margin-bottom:2px;}
+  .chat-msg .cm-text{font-size:14px;color:var(--ink);}
+  .chat-empty{text-align:center;font-size:13px;color:#9aa8a8;padding:12px;}
+  .chat-form{
+    display:flex;
+    gap:8px;
+  }
+  .chat-form input[type="text"]{
+    flex:1;
+    border:2px solid var(--line);
+    border-radius:999px;
+    padding:9px 14px;
+    font-size:14px;
+    font-family:'Noto Sans TC',sans-serif;
+  }
+  .chat-form input[type="text"]:focus{outline:none;border-color:var(--ocean);}
+  .chat-send{
+    border:2px solid var(--ocean);
+    background:var(--ocean);
+    color:#fff;
+    font-weight:700;
+    border-radius:999px;
+    padding:9px 16px;
+    cursor:pointer;
+  }
+  .chat-name-row{
+    text-align:center;
+    font-size:12px;
+    color:#7a8a8a;
+    margin-bottom:10px;
+  }
+  .chat-name-row button{
+    border:none;
+    background:none;
+    color:var(--ocean-deep);
+    font-weight:700;
+    text-decoration:underline;
+    cursor:pointer;
+    font-size:12px;
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <span class="eyebrow">9/5 – 9/8 · TAINAN → OKINAWA → TAINAN</span>
+  <h1>沖繩四天三夜 親子行 🐬</h1>
+  <p>從台南出發，一路玩到沖繩北部與中部，再平安回家</p>
+</div>
+
+<div class="route-wrap">
+  <div class="route-card">
+    <div class="route-title" id="routeTitle">✈️ Day 1 路線（Q版地圖）</div>
+    <div class="route-svg-holder" id="routeSvgHolder"></div>
+  </div>
+</div>
+
+<div class="weather-wrap">
+  <div class="weather-strip" id="weatherStrip">
+    <div class="weather-day"><div class="wd-date">載入天氣中…</div></div>
+  </div>
+  <div class="weather-note" id="weatherNote"></div>
+</div>
+
+<div class="controls">
+  <label>🔔 提醒提前 <input type="number" id="offset" value="10" min="0" max="60"> 分鐘</label>
+  <button class="notify-btn" id="notifyBtn">啟用瀏覽器提醒（示範）</button>
+  <button class="top-ics-btn" id="exportAllIcsBtn">📅 匯出整趟行程到行事曆</button>
+</div>
+
+<div class="tabs" id="tabs"></div>
+
+<div class="timeline-wrap" id="panels"></div>
+
+<footer>
+🔔 提醒時間會依你設定的分鐘數自動往前計算並標示；真正會跳通知的方式請用「📅 加入行事曆」，匯入手機行事曆後鎖屏也會準時提醒。<br>
+  🧭 導航按鈕會直接開啟 Google 地圖；✅ 已完成與 💬 留言板可多人共用（見下方「正式版規劃」分頁的設定說明）。<br>
+  所有交通時間、航班時間為討論時的估算值，請於出發前依實際機票與租車資訊再次確認。
+</footer>
+
+<script>
+const DAYS = [
+  {
+    id: 'd1', day:'Day 1', date:'9/5 (五)', iso:'2026-09-05', theme:'出發 → 名護',
+    route: [
+      {icon:'🏠', label:'台南', time:'06:20'},
+      {icon:'✈️', label:'小港機場', time:'07:10'},
+      {icon:'🛬', label:'那霸機場', time:'13:00'},
+      {icon:'🍔', label:'A&W(彈性)', time:'13:15'},
+      {icon:'🚌', label:'OTS接駁', time:'14:00'},
+      {icon:'🛍️', label:'iias豐崎', time:'15:20'},
+      {icon:'🧥', label:'Workman', time:'18:15'},
+      {icon:'🏨', label:'名護', time:'20:30'},
+    ],
+    summary: '台南出發 → 小港機場 → 那霸機場 → A&W 午餐 → 租車 → iias 豐崎 → Workman → 名護入住',
+    items: [
+      {time:'06:10', icon:'🔔', title:'準備出發提醒', note:'把行李、護照、證件再確認一次', transition:true},
+      {time:'06:20', icon:'🚗', title:'從台南住家出發', note:'前往高雄小港機場，車程約 40–50 分鐘', transition:true},
+      {time:'07:10', icon:'🛫', title:'抵達小港機場', note:'國際線建議起飛前 3 小時到，辦理報到、託運、安檢', transition:false},
+      {time:'09:25', icon:'⏰', title:'報到截止確認（最晚時間）', note:'虎航規定起飛前 45 分鐘截止報到（10:10 起飛）。若有 delay 這是硬底線，確認報到手續已完成，逾時不候', transition:true},
+      {time:'10:10', icon:'✈️', title:'搭機飛往沖繩那霸', note:'虎航 IT288，KHH→OKA', transition:false},
+      {time:'13:00', icon:'🛬', title:'抵達那霸機場（沖繩時間）', note:'入境、提領行李；1F 到達層旁有 Lawson，可先買水/點心', transition:false, nav:'那覇空港'},
+      {time:'13:15', icon:'🍔', title:'午餐：A&W 那霸空港店（彈性，可視情況跳過）', note:'虎航無機上餐。從國際線1F入境大廳出關後，沿指標走連絡通道到國內線航廈，搭電扶梯上3F，A&W就在JAL櫃台後方；必點招牌培根堡＋Root Beer（無酒精，可續杯）。若不去，1F 走去國內線航廈的路是接駁車必經路線，一樣要走', transition:false, nav:'A&W 那覇空港店'},
+      {time:'13:40', icon:'🚶', title:'走往國內線航廈搭接駁車', note:'國際線入境為 1F，需沿「國內線連絡通路」指標步行約 5–8 分鐘到國內線航廈；接駁車不管有沒有去 A&W 都要走這段', transition:true},
+      {time:'14:00', icon:'🚌', title:'國內線 1F 出口④搭 OTS 接駁車', note:'過馬路即達「10號」乘車處，向現場工作人員報訂位人姓名即可上車（人工帶位，不用自己找車），約每 15 分鐘一班，車程約 20 分', transition:false},
+      {time:'14:30', icon:'🚙', title:'OTS 租車手續', note:'抵達臨空豐崎營業所辦理', transition:false, nav:'OTSレンタカー 臨空豊崎営業所'},
+      {time:'15:00', icon:'🛍️', title:'出發前往 iias 沖繩豐崎', note:'車程約 20 分鐘', transition:true},
+      {time:'15:20', icon:'🐟', title:'DMM Kariyushi 水族館', note:'iias 內，約 1 小時', transition:false, nav:'イーアス沖縄豊崎'},
+      {time:'16:30', icon:'👕', title:'購物：UNIQLO／GU／ABC-MART', note:'幫小孩買衣服鞋子', transition:false},
+      {time:'17:30', icon:'🍜', title:'晚餐', note:'iias 美食街「STREET FOOD」或玉 GYOKU 拉麵', transition:false},
+      {time:'18:15', icon:'🧥', title:'WORKMAN Plus 豐見城店', note:'順路約 10–15 分鐘，選購機能服飾', transition:true, nav:'ワークマンプラス豊見城店'},
+      {time:'19:00', icon:'🚗', title:'出發前往名護', note:'車程約 1 小時 30–40 分', transition:true},
+      {time:'20:30', icon:'🏨', title:'抵達 Twin Line Hotel Yanbaru Okinawa', note:'第一晚入住休息', transition:false, nav:'TWIN-LINE HOTEL YANBARU OKINAWA'},
+    ]
+  },
+  {
+    id:'d2', day:'Day 2', date:'9/6 (六)', iso:'2026-09-06', theme:'海豚 → 水族館 → 古宅晚餐',
+    route: [
+      {icon:'🏨', label:'名護出發', time:'10:00'},
+      {icon:'🐬', label:'元氣村', time:'11:00'},
+      {icon:'🍜', label:'Marché', time:'12:45'},
+      {icon:'🐳', label:'美麗海', time:'14:00'},
+      {icon:'🍲', label:'Ufuya晚餐', time:'18:00'},
+    ],
+    summary:'元氣村海豚互動 → Hanasaki Marché 午餐 → 美麗海水族館 → 大家阿古豬晚餐',
+    items:[
+      {time:'10:00', icon:'🍳', title:'飯店早餐後出發', note:'前往本部町', transition:true},
+      {time:'11:00', icon:'🐬', title:'本部元氣村：海豚互動體驗', note:'已預約時段', transition:false, nav:'本部町元気村'},
+      {time:'12:30', icon:'🚗', title:'出發前往 Hanasaki Marché', note:'車程約 5–10 分', transition:true},
+      {time:'12:45', icon:'🍜', title:'午餐：拉麵 / 沖繩麵市集', note:'家人可各自選擇不同攤位', transition:false, nav:'ハナサキマルシェ'},
+      {time:'13:45', icon:'🚗', title:'出發前往美麗海水族館', note:'車程約 5–10 分', transition:true},
+      {time:'14:00', icon:'🐳', title:'沖繩美麗海水族館', note:'黑潮之海大水槽、海豚劇場等，約 3 小時', transition:false, nav:'沖縄美ら海水族館'},
+      {time:'17:00', icon:'🚗', title:'出發前往名護', note:'車程約 30–40 分', transition:true},
+      {time:'18:00', icon:'🍲', title:'晚餐：大家阿古豬 (Ufuya)', note:'瀑布聲中的百年古宅涮涮鍋 · 訂位已確認 ✅', transition:false, nav:'百年古家 大家'},
+    ],
+    lodging:'🏨 住宿：Twin Line Hotel Yanbaru Okinawa（第二晚）'
+  },
+  {
+    id:'d3', day:'Day 3', date:'9/7 (日)', iso:'2026-09-07', theme:'蒙特利玩水日',
+    route: [
+      {icon:'🏨', label:'名護退房', time:'10:30'},
+      {icon:'🌊', label:'恩納蒙特利', time:'11:30'},
+      {icon:'🚿', label:'準備出發', time:'18:00'},
+      {icon:'🥩', label:'琉球の牛', time:'18:30'},
+    ],
+    summary:'退房前往恩納 → 蒙特利全日玩水 → 分隊晚餐',
+    items:[
+      {time:'10:30', icon:'🧳', title:'退房，前往恩納村', note:'', transition:true},
+      {time:'11:30', icon:'🏨', title:'抵達沖繩蒙特利水療度假酒店', note:'辦理手續、寄放行李', transition:false, nav:'ホテルモントレ沖縄スパ&リゾート'},
+      {time:'12:00', icon:'🍙', title:'午餐', note:'超商快速解決：Lawson Onna Moon Beach／7-Eleven Onna Maeganeku（走路約5-10分）；想坐下來吃：Onna Soba（在地沖繩麵）或 More Blue（沖繩麵/和牛，評價高）', transition:false},
+      {time:'13:00', icon:'🏊', title:'全日飯店玩水模式', note:'人造浪池、滑水道、兒童戲水區、老虎海灘挖沙', transition:false},
+      {time:'18:00', icon:'🚿', title:'準備出發：琉球の牛（提早 30 分鐘）', note:'小孩玩水可能不想起來，提早叫起來洗澡換裝。從蒙特利走路約 10 分鐘內可達，沿海邊走過去', transition:true},
+      {time:'18:30', icon:'🥩', title:'分隊晚餐', note:'A 隊：琉球の牛（恩納店）訂位已確認 ✅ ／ B 隊：浜の家海鮮料理', transition:false, nav:'A隊：琉球の牛 恩納店／B隊：浜の家'},
+    ],
+    lodging:'🏨 住宿：沖繩蒙特利水療度假酒店'
+  },
+  {
+    id:'d4', day:'Day 4', date:'9/8 (一)', iso:'2026-09-08', theme:'瀨長島 → 返程',
+    route: [
+      {icon:'🏨', label:'蒙特利', time:'09:30'},
+      {icon:'📸', label:'瀨長島', time:'11:00'},
+      {icon:'🔑', label:'OTS還車', time:'11:45'},
+      {icon:'🛫', label:'那霸機場', time:'12:35'},
+      {icon:'✈️', label:'小港機場', time:'14:55'},
+      {icon:'🏠', label:'台南到家', time:'16:05'},
+    ],
+    summary:'退房 → 瀨長島 → 還車 → 那霸機場 → 小港機場 → 台南',
+    items:[
+      {time:'09:30', icon:'🧳', title:'飯店早餐後退房', note:'', transition:true},
+      {time:'10:00', icon:'🚗', title:'出發前往瀨長島', note:'車程約 60 分', transition:true},
+      {time:'11:00', icon:'📸', title:'Umikaji Terrace', note:'快速拍照、買點心，約 25 分鐘', transition:false, nav:'瀬長島ウミカジテラス'},
+      {time:'11:25', icon:'🚗', title:'出發前往 OTS 豐崎營業所', note:'車程約 15–20 分', transition:true},
+      {time:'11:45', icon:'🔑', title:'抵達營業所，辦理還車', note:'', transition:false, nav:'OTSレンタカー 臨空豊崎営業所'},
+      {time:'12:00', icon:'✅', title:'還車手續完成', note:'', transition:false},
+      {time:'12:15', icon:'🚌', title:'搭接駁車前往機場', note:'約每 15 分一班，車程約 20 分', transition:true},
+      {time:'12:35', icon:'🛫', title:'抵達那霸機場，開始報到', note:'回程無法線上報到，需現場排隊託運', transition:false, nav:'那覇空港'},
+      {time:'13:15', icon:'⏰', title:'報到截止確認（最晚時間）', note:'虎航規定起飛前 45 分鐘截止報到（14:00 起飛）。若有 delay 這是硬底線，確認報到手續已完成，逾時不候', transition:true},
+      {time:'14:00', icon:'✈️', title:'搭機返台', note:'虎航 IT289，OKA→KHH', transition:false},
+      {time:'14:55', icon:'🛬', title:'抵達高雄小港機場（台灣時間）', note:'入境、提領行李，約 20–30 分', transition:false},
+      {time:'15:20', icon:'🚗', title:'出發返回台南', note:'車程約 40–50 分', transition:false},
+      {time:'16:05', icon:'🏠', title:'抵達台南，行程結束！', note:'辛苦了 🎉', transition:false},
+    ]
+  },
+];
+
+const EXTRA_TABS = [
+  {
+    id:'notes', day:'注意事項', date:'', theme:'⚠️',
+    render: () => `
+      <div class="info-card warn">
+        <h3>✈️ 機場與航班</h3>
+        <ul>
+          <li>護照效期需在 6 個月以上，建議出發前再次確認</li>
+          <li>虎航報到截止＝起飛前 45 分鐘（去程 09:25 前／回程 13:15 前為底線，遇 delay 務必留意）</li>
+          <li>回程（沖繩那霸出發）無法線上報到，需現場排隊辦理登機、託運行李</li>
+          <li>國際線入境到國內線航廈（搭租車接駁車必經）步行約 5–8 分鐘，抓寬裕一點時間</li>
+        </ul>
+      </div>
+      <div class="info-card warn">
+        <h3>🚗 租車與交通</h3>
+        <ul>
+          <li>OTS 無法在機場直接取車/還車，需搭接駁車往返臨空豐崎營業所</li>
+          <li>接駁車搭乘處：國內線 1F 出口④過馬路，10 號乘車處，向工作人員報訂位人姓名即可（人工帶位，不用自己找車），約每 15 分鐘一班</li>
+          <li>租車需攜帶「台灣駕照正本＋日文譯本」（監理站申請，記得駕照效期需 6 個月以上），出發前再次確認證件齊全</li>
+          <li>琉球の牛（恩納店）店門口禁止停車上下客，開車前往需停到指定停車場再步行過去</li>
+        </ul>
+      </div>
+      <div class="info-card warn">
+        <h3>🍽️ 餐廳與訂位</h3>
+        <ul>
+          <li>大家阿古豬 (Ufuya)：9/6 18:00，訂位已確認 ✅</li>
+          <li>琉球の牛（恩納店）：9/7 18:30，訂位已確認 ✅</li>
+          <li>建議出發前一週再次致電或於官網確認以上兩間訂位</li>
+        </ul>
+      </div>
+      <div class="info-card warn">
+        <h3>🌀 天氣與其他</h3>
+        <ul>
+          <li>9 月仍是沖繩颱風季，行前請密切關注天氣，保留行程彈性備案</li>
+          <li>A&W 的 Root Beer 無酒精，小孩可以放心喝，可續杯</li>
+          <li>虎航無機上餐點，Day1 抵達後記得安排午餐（機場 A&W／空港食堂／Lawson 皆可）</li>
+        </ul>
+      </div>`
+  },
+  {
+    id:'driving', day:'自駕須知', date:'', theme:'🚙',
+    render: () => `
+      <div class="info-card warn">
+        <h3>🚙 基本駕駛規則</h3>
+        <ul>
+          <li>日本靠左行駛、方向盤在右邊，跟台灣完全相反，起步、轉彎時多提醒自己，尤其路口轉彎最容易恍神開錯車道</li>
+          <li>速限：一般道路 60km/h，沖繩自動車道（高速公路）只有 80km/h（不是本土的100），別以為是高速公路就開快</li>
+          <li>看到「止まれ（停）」標誌一定要完全停車至少 3 秒再開，路口很常見，這是取締重點</li>
+          <li>日本沒有「紅燈可右轉」，除非有標誌特別允許，否則紅燈一律不能右轉</li>
+          <li>開車中絕對禁止用手機，連拿起來看一眼都算違規，罰款很重（曾有台灣旅客被罰十萬日圓案例），要看導航先停車熄火</li>
+          <li>酒駕零容忍，罰則極重，同車乘客明知駕駛喝酒也會被連坐處罰</li>
+          <li>台灣小孩若未滿 6 歲，日本法規要求須乘坐兒童安全座椅，租車時記得跟 OTS 加租（先確認是否額外收費）</li>
+        </ul>
+      </div>
+      <div class="info-card warn">
+        <h3>🛣️ 超車道方向</h3>
+        <ul>
+          <li>台灣靠右行駛，超車走左側車道；日本靠左行駛，超車要走「右側」車道，邏輯一樣、方向相反，容易因為肌肉記憶下意識往左切，要特別留意</li>
+          <li>沖繩高速公路多數路段是雙向各一線道，沒有真正的超車道；少數雙線路段，外側（右邊）才是超車/快車道，內側維持一般速度</li>
+          <li>黃色實線：禁止跨越超車；白色虛線：可視狀況跨越超車</li>
+          <li>不熟悉時建議跟著前車車速走，不用刻意超車，比較安全</li>
+        </ul>
+      </div>
+      <div class="info-card warn">
+        <h3>⛽ 加油與過路費</h3>
+        <ul>
+          <li>加油別在高速公路服務區內加，價格偏高；市區加油站較便宜，租車時記得問清楚油種（通常是レギュラー無鉛汽油）</li>
+          <li>沖繩高速公路多數收費站尚未全面 ETC 化：入口先取通行券，出口窗口再付費，建議先備好零錢</li>
+        </ul>
+      </div>
+      <div class="info-card warn">
+        <h3>🅿️ 付費停車場標示</h3>
+        <ul>
+          <li>「有料」＝付費、「無料」＝免費，是最常見的兩個字</li>
+          <li>「コインパーキング」＝投幣式停車場（機械感應計費，離場前到機台繳費）</li>
+          <li>「満車」＝已滿、「空車／空き」＝有空位</li>
+          <li>費率常見格式：如「60分 300円」（每60分鐘300日圓）或「全日最大 800円」（當日封頂800日圓）</li>
+          <li>常見操作有兩種：①先拿票、離場前到自動繳費機付款；②進場時感應輪胎鎖車，離開前到機台輸入車位號碼付款、鎖解除才能開走，機台通常有中／英文按鈕可切換</li>
+          <li>市區道路較窄，避免路邊隨意停車，找有「P」＋「有料」標誌的停車場最安全，也不會擋到當地人</li>
+        </ul>
+      </div>
+      <div class="info-card warn">
+        <h3>🅿️ 本次行程各站停車場整理</h3>
+        <ul>
+          <li>Day1 iias 沖繩豐崎：大型免費停車場，車位多</li>
+          <li>Day1 Workman Plus 豐見城店：店門口免費停車場</li>
+          <li>Day1 Twin Line Hotel Yanbaru Okinawa：飯店附設免費停車場</li>
+          <li>Day2 本部元氣村：園區內免費停車場</li>
+          <li>Day2 Hanasaki Marché：約 400 格免費停車場</li>
+          <li>Day2 美麗海水族館（海洋博公園）：大型免費公共停車場，車位非常多</li>
+          <li>Day2 大家阿古豬 (Ufuya)：山區古宅自有免費停車場，本來就得開車前往</li>
+          <li>Day3 沖繩蒙特利水療度假酒店：飯店附設停車場，需額外付費，建議行前跟飯店確認實際費用</li>
+          <li>Day3 琉球の牛（恩納店）：店門口禁止停車上下客，需停到店家指定的免費停車場再步行過去</li>
+          <li>Day3 浜の家海鮮料理：店家有免費停車場，但車位有限，用餐尖峰可能要稍候</li>
+          <li>Day4 瀨長島 Umikaji Terrace：現場及對面皆有免費停車場，車位周轉快</li>
+          <li>Day4 OTS 豐崎營業所：這裡就是還車地點本身，不用另外找車位</li>
+        </ul>
+      </div>`
+  },
+  {
+    id:'packing', day:'打包清單', date:'', theme:'🧳',
+    render: () => `
+      <div class="info-card">
+        <h3>📄 證件與金錢</h3>
+        <ul>
+          <li>護照（效期 6 個月以上）</li>
+          <li>機票、租車、飯店、餐廳訂位確認信（電子＋紙本備份各一份）</li>
+          <li>台灣駕照正本＋日文譯本或國際駕照（租車必備）</li>
+          <li>信用卡、日幣現金</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <h3>👶 小孩用品</h3>
+        <ul>
+          <li>泳衣、泳圈（Day3 蒙特利玩水、備瀨/海邊備用）</li>
+          <li>防曬乳、曬後修復乳液</li>
+          <li>常備藥：退燒藥、腸胃藥、防蚊液、OK繃</li>
+          <li>好走的涼鞋/拖鞋（方便玩水後快乾）</li>
+          <li>薄外套（室內冷氣強、晚上稍涼）</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <h3>🎒 3C 與通訊</h3>
+        <ul>
+          <li>手機充電器、行動電源</li>
+          <li>相機／備用記憶卡</li>
+          <li>日本上網 SIM 卡或 WiFi 分享器</li>
+          <li>轉接頭（如有需要）</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <h3>🧴 其他</h3>
+        <ul>
+          <li>輕便雨具（9 月颱風季，帶把摺傘保險）</li>
+          <li>環保袋/防水袋（裝濕泳衣、購物用）</li>
+          <li>暈車藥（如小孩容易暈車，山路較多）</li>
+          <li>常備水壺（機場過安檢後可裝水）</li>
+        </ul>
+      </div>`
+  },
+  {
+    id:'roadmap', day:'正式版規劃', date:'', theme:'🛠️',
+    render: () => `
+      <div class="info-card">
+        <h3>📌 目前狀態</h3>
+        <ul>
+          <li>行程資料仍寫死在這份 HTML 裡（第 2 項尚未做），但推播、地圖、離線、天氣、多人同步已經是可以實際運作的功能了，不只是文字說明</li>
+          <li>3️⃣ 多人同步／留言需要你設定一次 Firebase（免費），設定步驟見程式碼裡 <code>FIREBASE_CONFIG</code> 上方的註解；設定前留言板只會存在你自己的裝置上</li>
+          <li>5️⃣ 離線快取（PWA／Service Worker）需要把這幾個檔案放到真正的網址上（如 Firebase Hosting／GitHub Pages），用 file:// 直接打開沒有 Service Worker</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <h3>1️⃣ 真正能推播的提醒 · ✅ 已可用（部分）</h3>
+        <ul>
+          <li>✅ 每個行程項目都有「📅 加入行事曆」按鈕，會下載 .ics 檔匯入 iPhone／Google 行事曆，鎖屏也會準時提醒；上方也有「匯出整趟行程」一次匯入全部</li>
+          <li>✅ 已加上 PWA（manifest + Service Worker），部署到 https 網址後可安裝到手機桌面</li>
+          <li>⏳ 尚未做：瀏覽器背景推播、LINE Notify／Telegram Bot 主動傳訊息（這兩者需要一台伺服器排程發送，目前先用 .ics 涵蓋最主要的需求）</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <h3>2️⃣ 資料與行程分離 · ⏳ 尚未做</h3>
+        <ul>
+          <li>行程資料改存資料庫或雲端表單（如 Google Sheets／Notion API）</li>
+          <li>網頁只負責讀取顯示，臨時調整（例如颱風改行程）直接改表格即可，不用再改程式碼</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <h3>3️⃣ 多人協作與即時同步 · ✅ 程式已做好，待你設定 Firebase</h3>
+        <ul>
+          <li>✅ 每個項目可勾選「已完成」，✅ 留言板可以打字留言，資料結構已支援跨裝置即時同步</li>
+          <li>👉 需要你到 <a href="https://console.firebase.google.com" target="_blank" rel="noopener" style="color:var(--ocean-deep)">Firebase 主控台</a> 建一個免費專案、開啟 Firestore，把設定值貼進程式碼的 <code>FIREBASE_CONFIG</code>，我可以照著步驟幫你貼上去</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <h3>4️⃣ 真正串接地圖 · ✅ 已完成</h3>
+        <ul>
+          <li>✅「🧭 開啟導航」按鈕已改成真正的 Google Maps 連結，點下去直接開導航 App</li>
+          <li>⏳ 尚未做：頁面內即時路況／車程時間試算（需要 Google Maps Directions API 金鑰與計費帳戶）</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <h3>5️⃣ 離線可用 · ✅ 程式已做好，待部署到 https 網址</h3>
+        <ul>
+          <li>✅ 已加上 manifest.json + sw.js（Service Worker），會快取整份行程頁面</li>
+          <li>👉 目前只是本機檔案，還沒有網址；部署到 Firebase Hosting／GitHub Pages／Netlify 之後才能真的離線使用與安裝到手機</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <h3>6️⃣ 天氣與航班即時資訊 · ✅ 天氣已完成／✈️ 航班尚未做</h3>
+        <ul>
+          <li>✅ 上方天氣列已串接 Open-Meteo，即時顯示沖繩未來預報（不需金鑰）</li>
+          <li>⏳ 尚未做：颱風警報自動標示、航班動態 API 自動偵測 delay（需申請付費航班資料服務）</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <h3>7️⃣ 帳號與隱私 · ⏳ 尚未做（這趟旅行不需要）</h3>
+        <ul>
+          <li>目前 4 人共用同一份留言/打勾資料，這趟旅行夠用</li>
+          <li>若之後想做成給別人也能用的通用工具，才需要加登入機制、每人資料分開儲存</li>
+        </ul>
+      </div>`
+  },
+  {
+    id:'chat', day:'留言板', date:'', theme:'💬',
+    render: () => `
+      <div class="chat-wall">
+        <div class="chat-name-row">目前暱稱：<b id="chatNameLabel">—</b> <button id="chatNameBtn" type="button">更改暱稱</button></div>
+        <div class="chat-msgs" id="chatMsgs"><div class="chat-empty">載入留言中…</div></div>
+        <form class="chat-form" id="chatForm">
+          <input type="text" id="chatInput" placeholder="留言給大家，例如：我們已經到囉～" maxlength="200" autocomplete="off">
+          <button class="chat-send" type="submit">送出</button>
+        </form>
+        <div class="sync-note" id="chatSyncNote"></div>
+      </div>`
+  },
+];
+
+const tabsEl = document.getElementById('tabs');
+const panelsEl = document.getElementById('panels');
+const offsetInput = document.getElementById('offset');
+const routeWrapEl = document.querySelector('.route-wrap');
+
+function toMinutes(t){
+  const [h,m] = t.split(':').map(Number);
+  return h*60+m;
+}
+function toTimeStr(mins){
+  mins = ((mins % 1440) + 1440) % 1440;
+  const h = Math.floor(mins/60).toString().padStart(2,'0');
+  const m = (mins%60).toString().padStart(2,'0');
+  return `${h}:${m}`;
+}
+
+const ROUTE_COLORS = ['#FFC33D','#FF7A59','#0E7C86'];
+const routeSvgHolder = document.getElementById('routeSvgHolder');
+const routeTitleEl = document.getElementById('routeTitle');
+
+function renderRouteMap(day){
+  const nodes = day.route;
+  const n = nodes.length;
+  const width = Math.max(820, n * 110);
+  const height = 235;
+  const padX = 60;
+  const topY = 85, bottomY = 140;
+
+  // compute point positions along a gentle alternating wave
+  const pts = nodes.map((node, i) => {
+    const x = n === 1 ? width/2 : padX + i * (width - 2*padX) / (n - 1);
+    const wave = Math.sin((i / Math.max(n-1,1)) * Math.PI * 1.6 + 0.4);
+    const y = 105 + wave * 40 * (i % 2 === 0 ? 1 : -1) * 0.55 + (i % 2 === 0 ? -20 : 20);
+    return {x, y: Math.max(topY, Math.min(bottomY, y))};
+  });
+
+  // smooth path through points (Catmull-Rom -> Bezier)
+  let pathD = '';
+  if(pts.length === 1){
+    pathD = `M${pts[0].x},${pts[0].y}`;
+  } else {
+    pathD = `M${pts[0].x},${pts[0].y} `;
+    for(let i=0; i<pts.length-1; i++){
+      const p0 = pts[i-1] || pts[i];
+      const p1 = pts[i];
+      const p2 = pts[i+1];
+      const p3 = pts[i+2] || p2;
+      const c1x = p1.x + (p2.x - p0.x)/6;
+      const c1y = p1.y + (p2.y - p0.y)/6;
+      const c2x = p2.x - (p3.x - p1.x)/6;
+      const c2y = p2.y - (p3.y - p1.y)/6;
+      pathD += `C${c1x},${c1y} ${c2x},${c2y} ${p2.x},${p2.y} `;
+    }
+  }
+
+  let nodesSvg = '';
+  nodes.forEach((node, i) => {
+    const p = pts[i];
+    const color = ROUTE_COLORS[i % ROUTE_COLORS.length];
+    const goesUp = p.y < 105;
+    const labelY = goesUp ? p.y - 24 : p.y + 34;
+    const timeY = goesUp ? p.y - 40 : p.y + 50;
+    const timeText = node.time ? `${i === 0 ? '出發' : '抵達'} ${node.time}` : '';
+    nodesSvg += `
+      <g>
+        <circle cx="${p.x}" cy="${p.y}" r="16" fill="${color}"/>
+        <text x="${p.x}" y="${p.y+5}" text-anchor="middle" font-size="14">${node.icon}</text>
+        <text x="${p.x}" y="${labelY}" class="route-node-label" text-anchor="middle">${node.label}</text>
+        ${timeText ? `<text x="${p.x}" y="${timeY}" class="route-node-sub" text-anchor="middle">${timeText}</text>` : ''}
+      </g>`;
+  });
+
+  routeSvgHolder.style.minWidth = width + 'px';
+  routeSvgHolder.innerHTML = `
+    <svg viewBox="0 0 ${width} ${height}" width="100%" height="${height}">
+      <path d="${pathD}" fill="none" stroke="#0E7C86" stroke-width="4"
+            stroke-linecap="round" stroke-dasharray="1 14" opacity="0.55"/>
+      ${nodesSvg}
+    </svg>`;
+  routeTitleEl.textContent = `✈️ ${day.day}（${day.date}）路線：${day.theme}`;
+}
+
+const itemsIndex = {}; // itemKey -> {iso, time, title, note, nav}
+let completedMap = loadCompletedLocal();
+let currentActiveId = DAYS[0].id;
+
+function loadCompletedLocal(){
+  try{ return JSON.parse(localStorage.getItem('okinawaCompletedMap') || '{}'); }
+  catch(e){ return {}; }
+}
+function saveCompletedLocal(){
+  try{ localStorage.setItem('okinawaCompletedMap', JSON.stringify(completedMap)); }
+  catch(e){}
+}
+
+let pendingChatInputValue = '';
+
+function render(){
+  const offset = parseInt(offsetInput.value || '0', 10);
+  const existingChatInput = document.getElementById('chatInput');
+  if(existingChatInput) pendingChatInputValue = existingChatInput.value;
+  tabsEl.innerHTML = '';
+  panelsEl.innerHTML = '';
+
+  DAYS.forEach((d, idx) => {
+    const isActive = d.id === currentActiveId;
+    const tab = document.createElement('div');
+    tab.className = 'tab' + (isActive ? ' active' : '');
+    tab.dataset.target = d.id;
+    tab.innerHTML = `<div class="tab-day">${d.day}</div><div class="tab-date">${d.date}</div><div class="tab-theme">${d.theme}</div>`;
+    tab.addEventListener('click', () => switchDay(d.id));
+    tabsEl.appendChild(tab);
+
+    const panel = document.createElement('div');
+    panel.className = 'day-panel' + (isActive ? ' active' : '');
+    panel.id = 'panel-' + d.id;
+
+    let itemsHtml = '';
+    d.items.forEach((it, i) => {
+      const key = `${d.id}-${i}`;
+      itemsIndex[key] = {iso:d.iso, time:it.time, title:it.title, note:it.note, nav:it.nav};
+      const done = !!completedMap[key];
+
+      let badge = '';
+      if(it.transition){
+        const remindTime = toTimeStr(toMinutes(it.time) - offset);
+        badge = `<div class="reminder-badge">🔔 提醒：${remindTime}</div>`;
+      }
+      const mapHref = it.nav ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(it.nav)}` : '';
+      const navBadge = it.nav ? `<a class="map-link" href="${mapHref}" target="_blank" rel="noopener">🧭 開啟導航：${it.nav}</a>` : '';
+
+      itemsHtml += `
+        <div class="item ${it.transition ? 'transition':''}${done ? ' done':''}" data-icon="${it.icon}">
+          <div class="item-card">
+            <div class="item-top">
+              <span class="item-time">${it.time}</span>
+              <span class="item-title">${it.title}</span>
+            </div>
+            ${it.note ? `<div class="item-note">${it.note}</div>` : ''}
+            ${badge}
+            <div class="item-actions">
+              <label class="done-toggle"><input type="checkbox" class="done-checkbox" data-key="${key}" ${done ? 'checked':''}> 已完成</label>
+              <span class="ics-btn" data-key="${key}">📅 加入行事曆</span>
+              ${navBadge}
+            </div>
+          </div>
+        </div>`;
+    });
+
+    panel.innerHTML = `
+      <div class="day-summary">${d.summary}</div>
+      <div class="timeline">${itemsHtml}</div>
+      ${d.lodging ? `<div class="lodging">${d.lodging}</div>` : ''}
+    `;
+    panelsEl.appendChild(panel);
+  });
+
+  const tabBreak = document.createElement('div');
+  tabBreak.className = 'tab-break';
+  tabsEl.appendChild(tabBreak);
+
+  EXTRA_TABS.forEach(t => {
+    const isActive = t.id === currentActiveId;
+    const tab = document.createElement('div');
+    tab.className = 'tab' + (isActive ? ' active' : '');
+    tab.dataset.target = t.id;
+    tab.innerHTML = `<div class="tab-day">${t.theme} ${t.day}</div>`;
+    tab.addEventListener('click', () => switchDay(t.id));
+    tabsEl.appendChild(tab);
+
+    const panel = document.createElement('div');
+    panel.className = 'day-panel' + (isActive ? ' active' : '');
+    panel.id = 'panel-' + t.id;
+    panel.innerHTML = t.render();
+    panelsEl.appendChild(panel);
+  });
+
+  attachItemActionHandlers();
+  if(currentActiveId === 'chat') initChatWallDom();
+  const activeDay = DAYS.find(d => d.id === currentActiveId);
+  routeWrapEl.style.display = activeDay ? '' : 'none';
+  if(activeDay) renderRouteMap(activeDay);
+}
+
+function attachItemActionHandlers(){
+  panelsEl.querySelectorAll('.done-checkbox').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const key = cb.dataset.key;
+      completedMap[key] = cb.checked;
+      saveCompletedLocal();
+      cb.closest('.item').classList.toggle('done', cb.checked);
+      syncCompletedRemote(key, cb.checked);
+    });
+  });
+  panelsEl.querySelectorAll('.ics-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const info = itemsIndex[btn.dataset.key];
+      if(!info) return;
+      const ics = buildICS([{
+        uid: btn.dataset.key,
+        iso: info.iso, time: info.time,
+        title: info.title, note: info.note, nav: info.nav
+      }]);
+      downloadICS(`${info.title}.ics`, ics);
+    });
+  });
+}
+
+function switchDay(id){
+  currentActiveId = id;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.target === id));
+  document.querySelectorAll('.day-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + id));
+  const day = DAYS.find(d => d.id === id);
+  if(day){
+    routeWrapEl.style.display = '';
+    renderRouteMap(day);
+  } else {
+    routeWrapEl.style.display = 'none';
+  }
+  if(id === 'chat') initChatWallDom();
+}
+
+offsetInput.addEventListener('input', render);
+render();
+
+// ---------- Firebase realtime sync (multi-person: checkboxes + chat wall) ----------
+// To turn this on: create a free project at https://console.firebase.google.com,
+// enable "Firestore Database" (start in test mode is fine for a private family trip link),
+// then Project settings → your apps → add a Web app → copy the config object below.
+// Suggested Firestore rules (Firestore > Rules), scoped to this one trip document tree:
+//   match /trips/{tripId} { allow read, write: if true;
+//     match /comments/{c} { allow read, write: if true; } }
+// (Anyone with the link can edit — fine for a 4-person trip, not for a public tool.)
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCo-QYv9lSw35zC3QRd4gPEDLgnKFnBHS0",
+  authDomain: "okinawa-trip-cbaa6.firebaseapp.com",
+  projectId: "okinawa-trip-cbaa6",
+  storageBucket: "okinawa-trip-cbaa6.firebasestorage.app",
+  messagingSenderId: "44392212898",
+  appId: "1:44392212898:web:c98fc6519185839cc82afb"
+};
+const FIREBASE_ENABLED = typeof firebase !== 'undefined' && FIREBASE_CONFIG.apiKey.indexOf('YOUR_') !== 0;
+const TRIP_DOC_ID = 'okinawa-2026-09';
+let tripDocRef = null, commentsRef = null;
+let chatName = localStorage.getItem('okinawaChatName') || '';
+let chatMessages = loadChatLocal();
+
+if(FIREBASE_ENABLED){
+  firebase.initializeApp(FIREBASE_CONFIG);
+  const db = firebase.firestore();
+  tripDocRef = db.collection('trips').doc(TRIP_DOC_ID);
+  commentsRef = tripDocRef.collection('comments');
+
+  tripDocRef.set({completed:{}}, {merge:true}).catch(()=>{});
+  tripDocRef.onSnapshot(snap => {
+    const data = snap.data();
+    if(data && data.completed){
+      completedMap = Object.assign({}, completedMap, data.completed);
+      saveCompletedLocal();
+      render();
+    }
+  }, () => {});
+
+  commentsRef.orderBy('ts','asc').onSnapshot(snap => {
+    chatMessages = snap.docs.map(d => {
+      const m = d.data();
+      const ts = m.ts && m.ts.toDate ? m.ts.toDate() : null;
+      return {
+        author: m.author, text: m.text,
+        timeLabel: ts ? ts.toLocaleString('zh-TW', {month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'}) : '傳送中…'
+      };
+    });
+    renderChatMessages();
+  }, () => {});
+}
+
+function syncCompletedRemote(key, val){
+  if(!FIREBASE_ENABLED || !tripDocRef) return;
+  tripDocRef.set({completed:{[key]: val}}, {merge:true}).catch(()=>{});
+}
+
+function loadChatLocal(){
+  try{ return JSON.parse(localStorage.getItem('okinawaChatLocal') || '[]'); }
+  catch(e){ return []; }
+}
+function saveChatLocal(){
+  try{ localStorage.setItem('okinawaChatLocal', JSON.stringify(chatMessages)); }
+  catch(e){}
+}
+function escapeHtml(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function postChatMessage(author, text){
+  if(FIREBASE_ENABLED && commentsRef){
+    commentsRef.add({author, text, ts: firebase.firestore.FieldValue.serverTimestamp()});
+  } else {
+    chatMessages.push({author, text, timeLabel:new Date().toLocaleString('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})});
+    saveChatLocal();
+    renderChatMessages();
+  }
+}
+function renderChatMessages(){
+  const msgsEl = document.getElementById('chatMsgs');
+  if(!msgsEl) return;
+  if(!chatMessages.length){
+    msgsEl.innerHTML = '<div class="chat-empty">還沒有留言，說句話吧！</div>';
+    return;
+  }
+  msgsEl.innerHTML = chatMessages.map(m => `
+    <div class="chat-msg">
+      <div class="cm-meta">${escapeHtml(m.author)} · ${escapeHtml(m.timeLabel || '')}</div>
+      <div class="cm-text">${escapeHtml(m.text)}</div>
+    </div>`).join('');
+  msgsEl.scrollTop = msgsEl.scrollHeight;
+}
+function ensureChatName(){
+  if(!chatName){
+    chatName = (window.prompt('請輸入你的暱稱（會顯示在留言旁）：', '') || '匿名').trim() || '匿名';
+    localStorage.setItem('okinawaChatName', chatName);
+  }
+  return chatName;
+}
+function initChatWallDom(){
+  const nameLabel = document.getElementById('chatNameLabel');
+  const nameBtn = document.getElementById('chatNameBtn');
+  const form = document.getElementById('chatForm');
+  const input = document.getElementById('chatInput');
+  const syncNote = document.getElementById('chatSyncNote');
+  if(!nameLabel) return;
+
+  nameLabel.textContent = chatName || '（尚未設定）';
+  syncNote.textContent = FIREBASE_ENABLED
+    ? '✅ 已連接雲端，留言與打勾狀態會即時同步給大家'
+    : '⚠️ 尚未設定 Firebase，留言與打勾只會存在你自己的裝置上（見程式碼中的 FIREBASE_CONFIG 設定說明）';
+
+  nameBtn.onclick = () => {
+    const val = (window.prompt('輸入新的暱稱：', chatName) || '').trim();
+    if(val){ chatName = val; localStorage.setItem('okinawaChatName', chatName); nameLabel.textContent = chatName; }
+  };
+  if(pendingChatInputValue) input.value = pendingChatInputValue;
+
+  form.onsubmit = (e) => {
+    e.preventDefault();
+    const text = input.value.trim();
+    if(!text) return;
+    ensureChatName();
+    nameLabel.textContent = chatName;
+    postChatMessage(chatName, text);
+    input.value = '';
+  };
+  renderChatMessages();
+}
+
+// ---------- .ics calendar export ----------
+function icsDateUTC(iso, hhmm){
+  const [y,m,d] = iso.split('-').map(Number);
+  const [hh,mm] = hhmm.split(':').map(Number);
+  const utcMs = Date.UTC(y, m-1, d, hh, mm) - 9*3600*1000; // Okinawa is UTC+9, no DST
+  const dt = new Date(utcMs);
+  const pad = n => String(n).padStart(2,'0');
+  return `${dt.getUTCFullYear()}${pad(dt.getUTCMonth()+1)}${pad(dt.getUTCDate())}T${pad(dt.getUTCHours())}${pad(dt.getUTCMinutes())}00Z`;
+}
+function icsEscape(text){
+  return String(text || '').replace(/\\/g,'\\\\').replace(/([,;])/g,'\\$1').replace(/\n/g,'\\n');
+}
+function buildICS(events){
+  const lines = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//okinawa-trip//mvp//ZH','CALSCALE:GREGORIAN'];
+  events.forEach(ev => {
+    const endTime = toTimeStr(toMinutes(ev.time) + 30);
+    lines.push('BEGIN:VEVENT');
+    lines.push('UID:' + ev.uid + '@okinawa-trip.local');
+    lines.push('DTSTAMP:' + icsDateUTC(ev.iso, ev.time));
+    lines.push('DTSTART:' + icsDateUTC(ev.iso, ev.time));
+    lines.push('DTEND:' + icsDateUTC(ev.iso, endTime));
+    lines.push('SUMMARY:' + icsEscape(ev.title));
+    if(ev.note) lines.push('DESCRIPTION:' + icsEscape(ev.note));
+    if(ev.nav) lines.push('LOCATION:' + icsEscape(ev.nav));
+    lines.push('END:VEVENT');
+  });
+  lines.push('END:VCALENDAR');
+  return lines.join('\r\n');
+}
+function downloadICS(filename, icsText){
+  const blob = new Blob([icsText], {type:'text/calendar;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename.replace(/[\\/:*?"<>|]/g, '_');
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+document.getElementById('exportAllIcsBtn').addEventListener('click', () => {
+  const events = [];
+  DAYS.forEach(d => {
+    d.items.forEach((it, i) => {
+      events.push({uid:`${d.id}-${i}`, iso:d.iso, time:it.time, title:it.title, note:it.note, nav:it.nav});
+    });
+  });
+  downloadICS('沖繩四天三夜行程.ics', buildICS(events));
+});
+
+// ---------- live weather (Open-Meteo, no API key needed) ----------
+(async function loadWeather(){
+  const strip = document.getElementById('weatherStrip');
+  const note = document.getElementById('weatherNote');
+  try{
+    // Naha, Okinawa coordinates
+    const url = 'https://api.open-meteo.com/v1/forecast?latitude=26.2124&longitude=127.6809&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FTokyo&forecast_days=16';
+    const res = await fetch(url);
+    if(!res.ok) throw new Error('weather fetch failed');
+    const data = await res.json();
+    const tripIsoSet = DAYS.map(d => d.iso);
+    const WMAP = {
+      0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',
+      51:'🌦️',53:'🌦️',55:'🌦️',61:'🌧️',63:'🌧️',65:'🌧️',
+      71:'🌨️',73:'🌨️',75:'🌨️',80:'🌦️',81:'🌧️',82:'⛈️',
+      95:'⛈️',96:'⛈️',99:'⛈️'
+    };
+    let html = '';
+    data.daily.time.forEach((iso, i) => {
+      if(!tripIsoSet.includes(iso)) return;
+      const day = DAYS.find(d => d.iso === iso);
+      const icon = WMAP[data.daily.weathercode[i]] || '🌡️';
+      const max = Math.round(data.daily.temperature_2m_max[i]);
+      const min = Math.round(data.daily.temperature_2m_min[i]);
+      const rain = data.daily.precipitation_probability_max[i];
+      html += `<div class="weather-day">
+        <div class="wd-date">${day ? day.date : iso}</div>
+        <div class="wd-icon">${icon}</div>
+        <div class="wd-temp">${min}°–${max}°</div>
+        <div class="wd-rain">☔ ${rain}%</div>
+      </div>`;
+    });
+    if(html){
+      strip.innerHTML = html;
+      note.textContent = '天氣預報來自 Open-Meteo，僅供參考，出發前請再次確認最新預報／颱風警報';
+    } else {
+      strip.innerHTML = '<div class="weather-day"><div class="wd-date">尚無預報</div></div>';
+      note.textContent = '目前超出天氣預報範圍（通常只能抓未來 16 天），接近出發日再重新整理頁面看看';
+    }
+  } catch(e){
+    strip.innerHTML = '<div class="weather-day"><div class="wd-date">無法載入</div></div>';
+    note.textContent = '天氣資料載入失敗，請檢查網路連線';
+  }
+})();
+
+// --- Simple in-tab notification demo (MVP) ---
+const notifyBtn = document.getElementById('notifyBtn');
+let notifyEnabled = false;
+notifyBtn.addEventListener('click', async () => {
+  if(!('Notification' in window)){
+    alert('這個瀏覽器不支援通知功能，建議改用行事曆提醒。');
+    return;
+  }
+  const perm = await Notification.requestPermission();
+  if(perm === 'granted'){
+    notifyEnabled = true;
+    notifyBtn.classList.add('active');
+    notifyBtn.textContent = '✅ 提醒已啟用（此分頁需保持開啟）';
+    alert('提醒已啟用！這是示範功能：只有這個分頁保持開啟時才會跳通知，適合出發當天放著參考。正式使用建議把提醒時間加進手機行事曆。');
+  }
+});
+
+// ---------- PWA: offline caching + installable app ----------
+// Requires being served over https (or http://localhost) — service workers do not
+// run when the file is opened directly as file:///, so this needs real hosting
+// (e.g. Firebase Hosting, GitHub Pages, Netlify) to actually take effect.
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+</script>
+
+</body>
+</html>

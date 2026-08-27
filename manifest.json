@@ -1,0 +1,11 @@
+{
+  "name": "沖繩四天三夜 · 親子行程",
+  "short_name": "沖繩行程",
+  "start_url": "./okinawa-trip.html",
+  "display": "standalone",
+  "background_color": "#FFF6E9",
+  "theme_color": "#0E7C86",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
