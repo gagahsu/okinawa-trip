@@ -288,6 +288,57 @@
     padding:4px 10px;
     border-radius:999px;
   }
+  .item-tags{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-top:6px;
+  }
+  .item-tag{
+    position:relative;
+    display:inline-flex;
+    align-items:center;
+    padding:4px 10px;
+    border-radius:999px;
+    font-size:12.5px;
+    font-weight:700;
+    cursor:default;
+    border:1.5px solid var(--ocean);
+    color:var(--ocean-deep);
+    background:#EAF7F5;
+  }
+  .item-tag.tag-shoes{ border-color:var(--coral); color:var(--coral-deep); background:#FFF0EA; }
+  .item-tag.tag-gift{ border-color:var(--sun); color:#8A6300; background:#FFF7E0; }
+  .item-tag.tag-store{ border-color:var(--ink); color:var(--ink); background:var(--sand-deep); }
+  .item-tag:hover::after{
+    content:attr(data-tooltip);
+    position:absolute;
+    bottom:130%;
+    left:50%;
+    transform:translateX(-50%);
+    background:var(--ink);
+    color:#fff;
+    font-weight:500;
+    font-size:12px;
+    line-height:1.5;
+    padding:8px 10px;
+    border-radius:8px;
+    white-space:pre-line;
+    width:max-content;
+    max-width:220px;
+    box-shadow:0 6px 16px rgba(0,0,0,.2);
+    z-index:30;
+  }
+  .item-tag:hover::before{
+    content:'';
+    position:absolute;
+    bottom:118%;
+    left:50%;
+    transform:translateX(-50%);
+    border:6px solid transparent;
+    border-top-color:var(--ink);
+    z-index:30;
+  }
   .day-summary{
     text-align:center;
     font-size:13px;
@@ -570,9 +621,15 @@ const DAYS = [
       {time:'14:00', icon:'🚌', title:'國內線 1F 出口④搭 OTS 接駁車', note:'過馬路即達「10號」乘車處，向現場工作人員報訂位人姓名即可上車（人工帶位，不用自己找車），約每 15 分鐘一班，車程約 20 分', transition:false},
       {time:'14:30', icon:'🚙', title:'OTS 租車手續', note:'抵達臨空豐崎營業所辦理', transition:false, nav:'OTSレンタカー 臨空豊崎営業所'},
       {time:'15:00', icon:'🛍️', title:'出發前往 iias 沖繩豐崎', note:'車程約 20 分鐘', transition:true},
-      {time:'15:20', icon:'🐟', title:'DMM Kariyushi 水族館', note:'iias 內，約 1 小時', transition:false, nav:'イーアス沖縄豊崎'},
-      {time:'16:30', icon:'👕', title:'購物：UNIQLO／GU／ABC-MART', note:'幫小孩買衣服鞋子', transition:false},
-      {time:'17:30', icon:'🍜', title:'晚餐', note:'iias 美食街「STREET FOOD」或玉 GYOKU 拉麵', transition:false},
+      {time:'15:20', icon:'🐟', title:'DMM Kariyushi 水族館', note:'iias 內，入口在 2F，約 1 小時', transition:false, nav:'イーアス沖縄豊崎'},
+      {time:'16:30', icon:'🛍️', title:'購物：童裝／童鞋／伴手禮／AEON STYLE／DAISO', note:'ABC-MART 8/30–9/18歇業搬遷中，這趟不能去；滑鼠移到下方標籤看各店家與樓層／推薦商品', transition:false, tags:[
+        {label:'童裝', cls:'', detail:'UNIQLO 2F\nGU 3F\n西松屋 3F'},
+        {label:'童鞋', cls:'tag-shoes', detail:'西松屋 3F（現貨最穩）\nSKECHERS 2F（不確定有童鞋現貨）\n※ABC-MART 歇業中不能去'},
+        {label:'伴手禮', cls:'tag-gift', detail:'おきなわのおくりもの 1F（沖繩雜貨伴手禮）\nSuisaVon・首里石鹸 2F（手工皂）'},
+        {label:'AEON STYLE(1F)', cls:'tag-store', detail:'推薦：紅芋塔、雪鹽ちんすこう\n金楚糕（ちんすこう）、ROYCE\'巧克力\nOrion啤酒、泡盛、當季水果\n（葡萄／鳳梨／火龍果）'},
+        {label:'DAISO(1F)', cls:'tag-store', detail:'推薦：泡澡球（¥108起）\n輕便旅行小物'},
+      ]},
+      {time:'17:30', icon:'🍜', title:'晚餐', note:'iias 美食街「STREET FOOD」或玉 GYOKU 拉麵，也可以選 iias 1F 的 A&W', transition:false},
       {time:'18:15', icon:'🧥', title:'WORKMAN Plus 豐見城店', note:'順路約 10–15 分鐘，選購機能服飾', transition:true, nav:'ワークマンプラス豊見城店'},
       {time:'19:00', icon:'🚗', title:'出發前往名護', note:'車程約 1 小時 30–40 分', transition:true},
       {time:'20:30', icon:'🏨', title:'抵達 Twin Line Hotel Yanbaru Okinawa', note:'第一晚入住休息', transition:false, nav:'TWIN-LINE HOTEL YANBARU OKINAWA'},
@@ -586,8 +643,9 @@ const DAYS = [
       {icon:'🍜', label:'Marché', time:'12:45'},
       {icon:'🐳', label:'美麗海', time:'14:00'},
       {icon:'🍲', label:'Ufuya晚餐', time:'18:00'},
+      {icon:'🛒', label:'唐吉訶德', time:'19:45'},
     ],
-    summary:'元氣村海豚互動 → Hanasaki Marché 午餐 → 美麗海水族館 → 大家阿古豬晚餐',
+    summary:'元氣村海豚互動 → Hanasaki Marché 午餐 → 美麗海水族館 → 大家阿古豬晚餐 → 唐吉訶德名護店',
     items:[
       {time:'10:00', icon:'🍳', title:'飯店早餐後出發', note:'前往本部町', transition:true},
       {time:'11:00', icon:'🐬', title:'本部元氣村：海豚互動體驗', note:'已預約時段', transition:false, nav:'本部町元気村'},
@@ -597,6 +655,9 @@ const DAYS = [
       {time:'14:00', icon:'🐳', title:'沖繩美麗海水族館', note:'黑潮之海大水槽、海豚劇場等，約 3 小時', transition:false, nav:'沖縄美ら海水族館'},
       {time:'17:00', icon:'🚗', title:'出發前往名護', note:'車程約 30–40 分', transition:true},
       {time:'18:00', icon:'🍲', title:'晚餐：大家阿古豬 (Ufuya)', note:'瀑布聲中的百年古宅涮涮鍋 · 訂位已確認 ✅', transition:false, nav:'百年古家 大家'},
+      {time:'19:30', icon:'🚗', title:'出發前往唐吉訶德 名護店', note:'順路回飯店的路上，車程約 10–15 分', transition:true},
+      {time:'19:45', icon:'🛒', title:'唐吉訶德 沖縄名護店', note:'買泡澡球、零食、伴手禮，逛約 45 分鐘', transition:false, nav:'ドン・キホーテ 名護店'},
+      {time:'20:30', icon:'🏨', title:'返回飯店休息', note:'', transition:false},
     ],
     lodging:'🏨 住宿：Twin Line Hotel Yanbaru Okinawa（第二晚）'
   },
@@ -1006,6 +1067,9 @@ function render(){
       }
       const mapHref = it.nav ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(it.nav)}` : '';
       const navBadge = it.nav ? `<a class="map-link" href="${mapHref}" target="_blank" rel="noopener">🧭 開啟導航：${it.nav}</a>` : '';
+      const tagsHtml = it.tags ? `<div class="item-tags">${it.tags.map(t =>
+        `<span class="item-tag ${t.cls || ''}" data-tooltip="${t.detail.replace(/"/g,'&quot;')}">${t.label}</span>`
+      ).join('')}</div>` : '';
 
       itemsHtml += `
         <div class="item ${it.transition ? 'transition':''}${done ? ' done':''}" data-icon="${it.icon}">
@@ -1015,6 +1079,7 @@ function render(){
               <span class="item-title">${it.title}</span>
             </div>
             ${it.note ? `<div class="item-note">${it.note}</div>` : ''}
+            ${tagsHtml}
             ${badge}
             <div class="item-actions">
               <label class="done-toggle"><input type="checkbox" class="done-checkbox" data-key="${key}" ${done ? 'checked':''}> 已完成</label>
