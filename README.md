@@ -42,7 +42,11 @@ python -m http.server 8000
 # 開瀏覽器 http://localhost:8000/okinawa-trip.html
 ```
 
-部署到 Firebase Hosting：
+**自動部署（CI/CD）**：`main` 分支只要有 push（包含 merge PR），GitHub Actions 會自動部署到 Firebase Hosting 正式站，設定檔在 `.github/workflows/firebase-hosting-merge.yml`；另外每個 PR 也會自動部署一個預覽版連結（`.github/workflows/firebase-hosting-pull-request.yml`），方便合併前先看效果。
+
+需要先在 repo 的 GitHub Settings → Secrets and variables → Actions 設定 `FIREBASE_SERVICE_ACCOUNT_OKINAWA_TRIP_CBAA6`（Firebase 專案的 Service Account JSON key，可用 `npx firebase init hosting:github` 自動產生並寫入 secret，或手動在 GCP 專案的 IAM 頁面建立）。
+
+手動部署（CI 尚未設定好時的備援方式）：
 
 ```bash
 npm install firebase-tools
