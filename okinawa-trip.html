@@ -909,68 +909,6 @@ const EXTRA_TABS = [
     }
   },
   {
-    id:'roadmap', day:'正式版規劃', date:'', theme:'🛠️',
-    render: () => `
-      <div class="info-card">
-        <h3>📌 目前狀態</h3>
-        <ul>
-          <li>行程資料仍寫死在這份 HTML 裡（第 2 項尚未做），但推播、地圖、離線、天氣、多人同步已經是可以實際運作的功能了，不只是文字說明</li>
-          <li>3️⃣ 多人同步／留言需要你設定一次 Firebase（免費），設定步驟見程式碼裡 <code>FIREBASE_CONFIG</code> 上方的註解；設定前留言板只會存在你自己的裝置上</li>
-          <li>5️⃣ 離線快取（PWA／Service Worker）需要把這幾個檔案放到真正的網址上（如 Firebase Hosting／GitHub Pages），用 file:// 直接打開沒有 Service Worker</li>
-        </ul>
-      </div>
-      <div class="info-card">
-        <h3>1️⃣ 真正能推播的提醒 · ✅ 已可用（部分）</h3>
-        <ul>
-          <li>✅ 每個行程項目都有「📅 加入行事曆」按鈕，會下載 .ics 檔匯入 iPhone／Google 行事曆，鎖屏也會準時提醒；上方也有「匯出整趟行程」一次匯入全部</li>
-          <li>✅ 已加上 PWA（manifest + Service Worker），部署到 https 網址後可安裝到手機桌面</li>
-          <li>⏳ 尚未做：瀏覽器背景推播、LINE Notify／Telegram Bot 主動傳訊息（這兩者需要一台伺服器排程發送，目前先用 .ics 涵蓋最主要的需求）</li>
-        </ul>
-      </div>
-      <div class="info-card">
-        <h3>2️⃣ 資料與行程分離 · ⏳ 尚未做</h3>
-        <ul>
-          <li>行程資料改存資料庫或雲端表單（如 Google Sheets／Notion API）</li>
-          <li>網頁只負責讀取顯示，臨時調整（例如颱風改行程）直接改表格即可，不用再改程式碼</li>
-        </ul>
-      </div>
-      <div class="info-card">
-        <h3>3️⃣ 多人協作與即時同步 · ✅ 程式已做好，待你設定 Firebase</h3>
-        <ul>
-          <li>✅ 每個項目可勾選「已完成」，✅ 留言板可以打字留言，資料結構已支援跨裝置即時同步</li>
-          <li>👉 需要你到 <a href="https://console.firebase.google.com" target="_blank" rel="noopener" style="color:var(--ocean-deep)">Firebase 主控台</a> 建一個免費專案、開啟 Firestore，把設定值貼進程式碼的 <code>FIREBASE_CONFIG</code>，我可以照著步驟幫你貼上去</li>
-        </ul>
-      </div>
-      <div class="info-card">
-        <h3>4️⃣ 真正串接地圖 · ✅ 已完成</h3>
-        <ul>
-          <li>✅「🧭 開啟導航」按鈕已改成真正的 Google Maps 連結，點下去直接開導航 App</li>
-          <li>⏳ 尚未做：頁面內即時路況／車程時間試算（需要 Google Maps Directions API 金鑰與計費帳戶）</li>
-        </ul>
-      </div>
-      <div class="info-card">
-        <h3>5️⃣ 離線可用 · ✅ 程式已做好，待部署到 https 網址</h3>
-        <ul>
-          <li>✅ 已加上 manifest.json + sw.js（Service Worker），會快取整份行程頁面</li>
-          <li>👉 目前只是本機檔案，還沒有網址；部署到 Firebase Hosting／GitHub Pages／Netlify 之後才能真的離線使用與安裝到手機</li>
-        </ul>
-      </div>
-      <div class="info-card">
-        <h3>6️⃣ 天氣與航班即時資訊 · ✅ 天氣已完成／✈️ 航班尚未做</h3>
-        <ul>
-          <li>✅ 上方天氣列已串接 Open-Meteo，即時顯示沖繩未來預報（不需金鑰）</li>
-          <li>⏳ 尚未做：颱風警報自動標示、航班動態 API 自動偵測 delay（需申請付費航班資料服務）</li>
-        </ul>
-      </div>
-      <div class="info-card">
-        <h3>7️⃣ 帳號與隱私 · ⏳ 尚未做（這趟旅行不需要）</h3>
-        <ul>
-          <li>目前 4 人共用同一份留言/打勾資料，這趟旅行夠用</li>
-          <li>若之後想做成給別人也能用的通用工具，才需要加登入機制、每人資料分開儲存</li>
-        </ul>
-      </div>`
-  },
-  {
     id:'chat', day:'留言板', date:'', theme:'💬',
     render: () => `
       <div class="chat-wall">
