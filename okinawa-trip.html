@@ -470,6 +470,29 @@
     opacity:.55;
   }
   .item.done .item-card{opacity:.75;}
+
+  /* ---------- PACKING CHECKLIST ---------- */
+  .checklist-row{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    padding:7px 0;
+    font-size:14px;
+    line-height:1.55;
+    color:var(--ink);
+    border-bottom:1px dashed var(--line);
+  }
+  .checklist-row:last-child{border-bottom:none;}
+  .checklist-row input{margin-top:3px;flex-shrink:0;width:16px;height:16px;}
+  .checklist-row label{cursor:pointer;}
+  .checklist-row.done label{text-decoration:line-through;opacity:.5;}
+  .packing-progress{
+    text-align:center;
+    font-size:13px;
+    font-weight:700;
+    color:var(--ocean-deep);
+    margin:0 0 14px;
+  }
   .ics-btn, .map-link{
     display:inline-flex;
     align-items:center;
@@ -709,6 +732,43 @@ const DAYS = [
   },
 ];
 
+const PACKING_ITEMS = [
+  { cat:'📄 證件與金錢（兩大兩小）', items:[
+    '全家護照（效期需 6 個月以上，出發前再次確認）',
+    '機票、租車（OTS）、飯店、餐廳（Ufuya、琉球の牛）訂位確認信（電子＋紙本備份各一份）',
+    '台灣駕照正本＋日文譯本（監理站申請，租車必備）',
+    '信用卡、日幣現金（含零錢，高速公路收費站、投幣停車場常需現場付現）',
+  ]},
+  { cat:'🏊 玩水／海洋行程（Day2 海豚、Day3 蒙特利玩水）', items:[
+    '大人＋小孩泳衣各一套（建議帶備用）',
+    '兒童泳圈／浮臂圈',
+    '快乾毛巾、防曬乳（大人+兒童配方）、曬後修復乳液',
+    '抗UV外套/泳裝罩衫、遮陽帽、太陽眼鏡',
+    '玩水後好走的拖鞋/水鞋（方便快乾）',
+  ]},
+  { cat:'👶 小孩專用', items:[
+    '若小孩未滿 6 歲：租車時務必和 OTS 確認加租兒童安全座椅（日本法規強制，先確認是否額外收費）',
+    '常備藥：退燒藥（家中慣用款）、腸胃藥、防蚊液、OK繃',
+    '小孩慣用的零食、水壺（機場過安檢後可裝水）',
+    '平板/畫本等安撫小物（Day1、Day4 移動時間較長）',
+    '薄長袖外套（餐廳/車內冷氣強、晚上稍涼）',
+    '換洗衣物建議抓 5 套（含玩水弄濕的備用）',
+  ]},
+  { cat:'🎒 3C 與通訊', items:[
+    '手機充電器、行動電源、車用充電器',
+    '相機／備用記憶卡（海豚體驗、水族館值得拍）',
+    '手機防水袋（玩水時使用）',
+    '日本上網 SIM 卡或 WiFi 分享器',
+    '轉接頭（如有需要）',
+  ]},
+  { cat:'🧴 其他', items:[
+    '輕便雨具（9 月颱風季，帶把摺傘或雨衣保險）',
+    '環保袋/防水袋數個（裝濕泳衣、水族館購物用）',
+    '暈車藥（山路較多，尤其名護、恩納段）',
+    '盥洗用品（多數飯店有備，可精簡）、隱形眼鏡/眼鏡備用（如有配戴）',
+  ]},
+];
+
 const EXTRA_TABS = [
   {
     id:'notes', day:'注意事項', date:'', theme:'⚠️',
@@ -823,44 +883,30 @@ const EXTRA_TABS = [
   },
   {
     id:'packing', day:'打包清單', date:'', theme:'🧳',
-    render: () => `
-      <div class="info-card">
-        <h3>📄 證件與金錢</h3>
-        <ul>
-          <li>護照（效期 6 個月以上）</li>
-          <li>機票、租車、飯店、餐廳訂位確認信（電子＋紙本備份各一份）</li>
-          <li>台灣駕照正本＋日文譯本或國際駕照（租車必備）</li>
-          <li>信用卡、日幣現金</li>
-        </ul>
-      </div>
-      <div class="info-card">
-        <h3>👶 小孩用品</h3>
-        <ul>
-          <li>泳衣、泳圈（Day3 蒙特利玩水、備瀨/海邊備用）</li>
-          <li>防曬乳、曬後修復乳液</li>
-          <li>常備藥：退燒藥、腸胃藥、防蚊液、OK繃</li>
-          <li>好走的涼鞋/拖鞋（方便玩水後快乾）</li>
-          <li>薄外套（室內冷氣強、晚上稍涼）</li>
-        </ul>
-      </div>
-      <div class="info-card">
-        <h3>🎒 3C 與通訊</h3>
-        <ul>
-          <li>手機充電器、行動電源</li>
-          <li>相機／備用記憶卡</li>
-          <li>日本上網 SIM 卡或 WiFi 分享器</li>
-          <li>轉接頭（如有需要）</li>
-        </ul>
-      </div>
-      <div class="info-card">
-        <h3>🧴 其他</h3>
-        <ul>
-          <li>輕便雨具（9 月颱風季，帶把摺傘保險）</li>
-          <li>環保袋/防水袋（裝濕泳衣、購物用）</li>
-          <li>暈車藥（如小孩容易暈車，山路較多）</li>
-          <li>常備水壺（機場過安檢後可裝水）</li>
-        </ul>
-      </div>`
+    render: () => {
+      let idx = 0;
+      let doneCount = 0;
+      let totalCount = 0;
+      const cardsHtml = PACKING_ITEMS.map(group => {
+        const rowsHtml = group.items.map(text => {
+          const key = `packing-${idx++}`;
+          const done = !!completedMap[key];
+          totalCount++;
+          if(done) doneCount++;
+          return `
+            <div class="checklist-row${done ? ' done':''}">
+              <input type="checkbox" class="pack-checkbox" id="${key}" data-key="${key}" ${done ? 'checked':''}>
+              <label for="${key}">${text}</label>
+            </div>`;
+        }).join('');
+        return `
+          <div class="info-card">
+            <h3>${group.cat}</h3>
+            ${rowsHtml}
+          </div>`;
+      }).join('');
+      return `<div class="packing-progress" id="packingProgress">已打包 ${doneCount} / ${totalCount} 項</div>${cardsHtml}`;
+    }
   },
   {
     id:'roadmap', day:'正式版規劃', date:'', theme:'🛠️',
@@ -1146,6 +1192,21 @@ function attachItemActionHandlers(){
       saveCompletedLocal();
       cb.closest('.item').classList.toggle('done', cb.checked);
       syncCompletedRemote(key, cb.checked);
+    });
+  });
+  panelsEl.querySelectorAll('.pack-checkbox').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const key = cb.dataset.key;
+      completedMap[key] = cb.checked;
+      saveCompletedLocal();
+      cb.closest('.checklist-row').classList.toggle('done', cb.checked);
+      syncCompletedRemote(key, cb.checked);
+      const progressEl = document.getElementById('packingProgress');
+      if(progressEl){
+        const doneCount = panelsEl.querySelectorAll('.pack-checkbox:checked').length;
+        const totalCount = panelsEl.querySelectorAll('.pack-checkbox').length;
+        progressEl.textContent = `已打包 ${doneCount} / ${totalCount} 項`;
+      }
     });
   });
   panelsEl.querySelectorAll('.ics-btn').forEach(btn => {
